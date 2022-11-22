@@ -1,0 +1,7 @@
+guac.company.com {
+    reverse_proxy guacamole:8080 {
+        trusted_proxies private_ranges
+        flush_interval -1
+    }
+    tls internal
+}

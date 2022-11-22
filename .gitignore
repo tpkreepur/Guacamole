@@ -1,0 +1,7 @@
+guacamole.env
+/.ssh/
+ssl/*.crt
+ssl/*.key
+/postgres/
+/caddy/
+/tomcat/

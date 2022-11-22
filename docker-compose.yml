@@ -1,0 +1,58 @@
+version: '1.0'
+networks:
+  web:
+  internal:
+
+services:
+  guacd:
+    env_file:
+      - guacamole.env
+    image: guacamole/guacd:latest
+    container_name: guacd
+    restart: always
+    networks:
+      - internal
+  guacamole:
+    build: .
+    env_file:
+      - guacamole.env
+    container_name: guacamole
+    restart: always
+    environment:
+      GUACD_HOSTNAME: guacd
+      POSTGRES_HOSTNAME: postgres
+    volumes:
+      - './tomcat/server.xml:/usr/local/tomcat/conf/server.xml'
+      # - './guac/logback.xml:/home/guacamole/.guacamole/logback.xml'
+    depends_on:
+      - guacd
+    networks:
+      - internal
+  postgres:
+    env_file:
+      - guacamole.env
+    image: postgres:latest
+    container_name: postgres
+    restart: always
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+      - ./postgres/initdb:/docker-entrypoint-initdb.d
+    networks:
+      - internal
+  caddy:
+    env_file:
+      - guacamole.env
+    container_name: caddy
+    image: caddy:latest
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy/certs:/etc/caddy/certs
+      - ./caddy/data:/data
+      - ./caddy/config:/config
+    networks:
+      - web
+      - internal
